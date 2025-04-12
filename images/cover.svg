@@ -1,0 +1,137 @@
+<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Black background -->
+  <rect width="300" height="300" fill="black" />
+  
+  <!-- Sun in corner -->
+  <g>
+    <!-- Sun glow - outer -->
+    <circle cx="40" cy="40" r="30" fill="#FFDD00" opacity="0.2">
+      <animate attributeName="r" values="30;32;30" dur="4s" repeatCount="indefinite" />
+    </circle>
+    
+    <!-- Sun glow - middle -->
+    <circle cx="40" cy="40" r="25" fill="#FFEE00" opacity="0.4">
+      <animate attributeName="r" values="25;27;25" dur="3.5s" repeatCount="indefinite" />
+    </circle>
+    
+    <!-- Sun body -->
+    <circle cx="40" cy="40" r="20" fill="#FFFF00">
+      <animate attributeName="fill" values="#FFFF00;#FFFFAA;#FFFF00" dur="5s" repeatCount="indefinite" />
+    </circle>
+    
+    <!-- Sun rays -->
+    <g stroke="#FFFF00" stroke-width="1.5" opacity="0.7">
+      <line x1="40" y1="10" x2="40" y2="5" />
+      <line x1="40" y1="75" x2="40" y2="70" />
+      <line x1="10" y1="40" x2="5" y2="40" />
+      <line x1="75" y1="40" x2="70" y2="40" />
+      <line x1="20" y1="20" x2="15" y2="15" />
+      <line x1="65" y1="65" x2="60" y2="60" />
+      <line x1="20" y1="60" x2="15" y2="65" />
+      <line x1="60" y1="20" x2="65" y2="15" />
+    </g>
+  </g>
+  
+  <!-- Stars in background -->
+  <g fill="white">
+    <circle cx="120" cy="40" r="1.5" />
+    <circle cx="160" cy="70" r="1" />
+    <circle cx="190" cy="30" r="1.2" />
+    <circle cx="250" cy="60" r="1.4" />
+    <circle cx="210" cy="40" r="1" />
+    <circle cx="270" cy="90" r="1.3" />
+    <circle cx="40" cy="220" r="1.1" />
+    <circle cx="70" cy="260" r="1.5" />
+    <circle cx="230" cy="230" r="1" />
+    <circle cx="260" cy="200" r="1.2" />
+    <circle cx="190" cy="250" r="1.4" />
+    <circle cx="120" cy="270" r="1" />
+  </g>
+  
+  <!-- Moon surface -->
+  <ellipse cx="150" cy="240" rx="200" ry="40" fill="#999999" />
+  <ellipse cx="150" cy="240" rx="200" ry="40" fill="url(#moonTexture)" />
+  
+  <!-- Moon craters -->
+  <circle cx="90" cy="230" r="10" fill="#888888" />
+  <circle cx="90" cy="230" r="8" fill="#777777" />
+  <circle cx="90" cy="230" r="6" fill="#999999" />
+  
+  <circle cx="210" cy="245" r="12" fill="#888888" />
+  <circle cx="210" cy="245" r="10" fill="#777777" />
+  <circle cx="210" cy="245" r="8" fill="#999999" />
+  
+  <circle cx="150" cy="250" r="8" fill="#888888" />
+  <circle cx="150" cy="250" r="6" fill="#777777" />
+  <circle cx="150" cy="250" r="4" fill="#999999" />
+  
+  <circle cx="60" cy="245" r="7" fill="#888888" />
+  <circle cx="60" cy="245" r="5" fill="#777777" />
+  <circle cx="60" cy="245" r="3" fill="#999999" />
+  
+  <circle cx="245" cy="235" r="9" fill="#888888" />
+  <circle cx="245" cy="235" r="7" fill="#777777" />
+  <circle cx="245" cy="235" r="5" fill="#999999" />
+  
+  <!-- Landing stands/legs under the UFO -->
+  <g>
+    <!-- Left stand -->
+    <path d="M110,155 L90,240" stroke="#707070" stroke-width="4" stroke-linecap="round" fill="none" />
+    <circle cx="90" cy="240" r="5" fill="#505050" stroke="#707070" stroke-width="1" />
+    
+    <!-- Center-left stand -->
+    <path d="M130,158 L120,240" stroke="#707070" stroke-width="4" stroke-linecap="round" fill="none" />
+    <circle cx="120" cy="240" r="5" fill="#505050" stroke="#707070" stroke-width="1" />
+    
+    <!-- Center-right stand -->
+    <path d="M170,158 L180,240" stroke="#707070" stroke-width="4" stroke-linecap="round" fill="none" />
+    <circle cx="180" cy="240" r="5" fill="#505050" stroke="#707070" stroke-width="1" />
+    
+    <!-- Right stand -->
+    <path d="M190,155 L210,240" stroke="#707070" stroke-width="4" stroke-linecap="round" fill="none" />
+    <circle cx="210" cy="240" r="5" fill="#505050" stroke="#707070" stroke-width="1" />
+  </g>
+  
+  <!-- Moon dust from landing -->
+  <ellipse cx="90" cy="240" rx="12" ry="3" fill="#AAAAAA" opacity="0.5" />
+  <ellipse cx="120" cy="240" rx="12" ry="3" fill="#AAAAAA" opacity="0.5" />
+  <ellipse cx="180" cy="240" rx="12" ry="3" fill="#AAAAAA" opacity="0.5" />
+  <ellipse cx="210" cy="240" rx="12" ry="3" fill="#AAAAAA" opacity="0.5" />
+  
+  <!-- UFO Saucer main body - metallic gray -->
+  <ellipse cx="150" cy="150" rx="100" ry="30" fill="#505050" stroke="#707070" stroke-width="2" />
+  
+  <!-- UFO Top/Dome - bluish -->
+  <ellipse cx="150" cy="130" rx="50" ry="20" fill="#3A5A78" stroke="#4A6A88" stroke-width="2" />
+  
+  <!-- Window/Cockpit - glowing cyan -->
+  <ellipse cx="150" cy="130" rx="25" ry="10" fill="#00CCFF" stroke="#80E5FF" stroke-width="1" opacity="0.9">
+    <animate attributeName="opacity" values="0.7;0.9;0.7" dur="3s" repeatCount="indefinite" />
+  </ellipse>
+  
+  <!-- Bottom lights - glowing -->
+  <circle cx="110" cy="150" r="6" fill="#FFCC00" stroke="#FFDD44" stroke-width="1">
+    <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite" />
+  </circle>
+  <circle cx="150" cy="155" r="6" fill="#FFCC00" stroke="#FFDD44" stroke-width="1">
+    <animate attributeName="opacity" values="0.6;1;0.6" dur="1.7s" repeatCount="indefinite" />
+  </circle>
+  <circle cx="190" cy="150" r="6" fill="#FFCC00" stroke="#FFDD44" stroke-width="1">
+    <animate attributeName="opacity" values="0.6;1;0.6" dur="2.3s" repeatCount="indefinite" />
+  </circle>
+  
+  <!-- Define moon texture pattern -->
+  <defs>
+    <pattern id="moonTexture" patternUnits="userSpaceOnUse" width="100" height="100" patternTransform="rotate(0)">
+      <rect width="100" height="100" fill="#999999"/>
+      <circle cx="10" cy="10" r="2" fill="#888888" opacity="0.3"/>
+      <circle cx="30" cy="40" r="1.5" fill="#888888" opacity="0.2"/>
+      <circle cx="55" cy="15" r="1" fill="#888888" opacity="0.3"/>
+      <circle cx="75" cy="60" r="2.5" fill="#AAAAAA" opacity="0.2"/>
+      <circle cx="85" cy="25" r="1.2" fill="#888888" opacity="0.3"/>
+      <circle cx="20" cy="70" r="1.8" fill="#AAAAAA" opacity="0.2"/>
+      <circle cx="45" cy="85" r="1.5" fill="#888888" opacity="0.3"/>
+      <circle cx="65" cy="40" r="1" fill="#AAAAAA" opacity="0.2"/>
+    </pattern>
+  </defs>
+</svg>
