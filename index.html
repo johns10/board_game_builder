@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Adventure Board Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Space Adventure Board Game</h1>
+    
+    <div id="game-container">
+        <div id="game-board">
+            <canvas id="gameCanvas"></canvas>
+        </div>
+        
+        <div id="controls">
+        <div id="setup-controls" class="control-section">
+            <div class="control-row">
+                <div class="select-container">
+                    <label for="player-count">Number of Players: </label>
+                    <select id="player-count">
+                        <option value="2">2 Players</option>
+                        <option value="3">3 Players</option>
+                        <option value="4">4 Players</option>
+                    </select>
+                </div>
+                <button id="start-button" class="primary-button">Start Game</button>
+            </div>
+        </div>
+
+        <div id="game-controls" class="control-section">
+            <div id="status-message"></div>
+            <div id="dice-container">
+                <button id="roll-button" disabled>Roll Dice</button>
+            </div>
+            <div id="players-container"></div>
+        </div>
+    </div>
+    </div>
+
+    <script src="src/gameConfig.js"></script>
+    <script src="src/boardRenderer.js"></script>
+    <script src="src/main.js"></script>
+</body>
+</html>

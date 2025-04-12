@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Space Adventure Board Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
+    
+    #game-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 1000px;
+      width: 100%;
+    }
+    
+    #game-board {
+      position: relative;
+      width: 600px;
+      height: 600px;
+      background-color: white;
+      border: 2px solid #333;
+      border-radius: 5px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      margin-bottom: 20px;
+      overflow: hidden;
+      touch-action: none;
+    }
+    
+    #canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    
+    #controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 600px;
+      background-color: white;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    .control-row {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+    
+    button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    button:hover {
+      background-color: #2980b9;
+    }
+    
+    button:disabled {
+      background-color: #95a5a6;
+      cursor: not-allowed;
+    }
+    
+    #roll-button {
+      background-color: #2ecc71;
+      font-size: 18px;
+      padding: 12px 30px;
+    }
+    
+    #roll-button:hover {
+      background-color: #27ae60;
+    }
+    
+    select {
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      font-size: 16px;
+    }
+    
+    #game-info {
+      margin-top: 10px;
+      width: 100%;
+    }
+    
+    #status-message {
+      text-align: center;
+      font-size: 18px;
+      margin-bottom: 10px;
+      min-height: 30px;
+      color: #34495e;
+    }
+    
+    #dice-value {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 0 15px;
+      color: #2c3e50;
+    }
+    
+    .player-token {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      transition: transform 0.5s, left 0.5s, top 0.5s;
+      z-index: 10;
+    }
+    
+    #players-container {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      margin-top: 15px;
+    }
+    
+    .player-info {
+      display: flex;
+      align-items: center;
+      padding: 8px 15px;
+      border-radius: 50px;
+      transition: all 0.3s;
+    }
+    
+    .player-info.active {
+      box-shadow: 0 0 0 2px #3498db;
+      background-color: #eef7ff;
+    }
+    
+    .player-color {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    
+    .tile-effect {
+      position: absolute;
+      padding: 10px;
+      background-color: rgba(255, 255, 255, 0.9);
+      border-radius: 5px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      z-index: 20;
+      max-width: 200px;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .effect-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    #dice-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 10px 0;
+    }
+    
+    #dice {
+      width: 60px;
+      height: 60px;
+      position: relative;
+      margin-right: 15px;
+      transform-style: preserve-3d;
+      transition: transform 1s;
+    }
+    
+    .dice-face {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      background-color: white;
+      border: 2px solid #333;
+      border-radius: 5px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    
+    .face-1 { transform: rotateX(0deg) translateZ(30px); }
+    .face-2 { transform: rotateX(-90deg) translateZ(30px); }
+    .face-3 { transform: rotateY(90deg) translateZ(30px); }
+    .face-4 { transform: rotateY(-90deg) translateZ(30px); }
+    .face-5 { transform: rotateX(90deg) translateZ(30px); }
+    .face-6 { transform: rotateX(180deg) translateZ(30px); }
+    
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #333;
+      position: absolute;
+    }
+    
+    .face-1 .dot-1 { left: 50%; top: 50%; transform: translate(-50%, -50%); }
+    
+    .face-2 .dot-1 { left: 25%; top: 25%; }
+    .face-2 .dot-2 { right: 25%; bottom: 25%; }
+    
+    .face-3 .dot-1 { left: 25%; top: 25%; }
+    .face-3 .dot-2 { left: 50%; top: 50%; transform: translate(-50%, -50%); }
+    .face-3 .dot-3 { right: 25%; bottom: 25%; }
+    
+    .face-4 .dot-1 { left: 25%; top: 25%; }
+    .face-4 .dot-2 { right: 25%; top: 25%; }
+    .face-4 .dot-3 { left: 25%; bottom: 25%; }
+    .face-4 .dot-4 { right: 25%; bottom: 25%; }
+    
+    .face-5 .dot-1 { left: 25%; top: 25%; }
+    .face-5 .dot-2 { right: 25%; top: 25%; }
+    .face-5 .dot-3 { left: 50%; top: 50%; transform: translate(-50%, -50%); }
+    .face-5 .dot-4 { left: 25%; bottom: 25%; }
+    .face-5 .dot-5 { right: 25%; bottom: 25%; }
+    
+    .face-6 .dot-1 { left: 25%; top: 25%; }
+    .face-6 .dot-2 { right: 25%; top: 25%; }
+    .face-6 .dot-3 { left: 25%; top: 50%; transform: translateY(-50%); }
+    .face-6 .dot-4 { right: 25%; top: 50%; transform: translateY(-50%); }
+    .face-6 .dot-5 { left: 25%; bottom: 25%; }
+    .face-6 .dot-6 { right: 25%; bottom: 25%; }
+  </style>
+</head>
+<body>
+  <h1>Space Adventure Board Game</h1>
+  
+  <div id="game-container">
+    <div id="game-board">
+      <canvas id="canvas" width="600" height="600"></canvas>
+      <div id="effect-popup" class="tile-effect"></div>
+    </div>
+    
+    <div id="controls">
+      <div class="control-row">
+        <div>
+          <label for="player-count">Players: </label>
+          <select id="player-count">
+            <option value="2">2 Players</option>
+            <option value="3">3 Players</option>
+            <option value="4">4 Players</option>
+          </select>
+        </div>
+        <button id="start-button">Start Game</button>
+      </div>
+      
+      <div id="status-message"></div>
+      
+      <div id="dice-container">
+        <div id="dice">
+          <div class="dice-face face-1">
+            <div class="dot dot-1"></div>
+          </div>
+          <div class="dice-face face-2">
+            <div class="dot dot-1"></div>
+            <div class="dot dot-2"></div>
+          </div>
+          <div class="dice-face face-3">
+            <div class="dot dot-1"></div>
+            <div class="dot dot-2"></div>
+            <div class="dot dot-3"></div>
+          </div>
+          <div class="dice-face face-4">
+            <div class="dot dot-1"></div>
+            <div class="dot dot-2"></div>
+            <div class="dot dot-3"></div>
+            <div class="dot dot-4"></div>
+          </div>
+          <div class="dice-face face-5">
+            <div class="dot dot-1"></div>
+            <div class="dot dot-2"></div>
+            <div class="dot dot-3"></div>
+            <div class="dot dot-4"></div>
+            <div class="dot dot-5"></div>
+          </div>
+          <div class="dice-face face-6">
+            <div class="dot dot-1"></div>
+            <div class="dot dot-2"></div>
+            <div class="dot dot-3"></div>
+            <div class="dot dot-4"></div>
+            <div class="dot dot-5"></div>
+            <div class="dot dot-6"></div>
+          </div>
+        </div>
+        <button id="roll-button" disabled>Roll Dice</button>
+      </div>
+      
+      <div id="players-container"></div>
+    </div>
+  </div>
+
+  <script>
+    // Game Configuration
+    const gameConfig = {
+      // Board settings
+      boardSize: 600,
+      tileSize: 50,
+      padding: 50,
+      
+      // Game settings
+      diceRange: [1, 6],
+      
+      // Player colors
+      playerColors: ['#e74c3c', '#3498db', '#2ecc71', '#f39c12'],
+      
+      // Path definition - [x, y] coordinates for each tile
+      path: [
+        [1, 10], // Start position
+        [2, 10], [3, 10], [4, 10], [5, 10], [6, 10], [7, 10], [8, 10], [9, 10], [10, 10],
+        [10, 9], [10, 8], [10, 7], [10, 6], [10, 5], [10, 4], [10, 3], [10, 2], [10, 1],
+        [9, 1], [8, 1], [7, 1], [6, 1], [5, 1], [4, 1], [3, 1], [2, 1], [1, 1],
+        [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7], [1, 8], [1, 9],
+        [2, 9], [3, 9], [4, 9], [5, 9], [6, 9], [7, 9], [8, 9], [9, 9],
+        [9, 8], [9, 7], [9, 6], [9, 5], [9, 4], [9, 3], [9, 2],
+        [8, 2], [7, 2], [6, 2], [5, 2], [4, 2], [3, 2], [2, 2],
+        [2, 3], [2, 4], [2, 5], [2, 6], [2, 7], [2, 8],
+        [3, 8], [4, 8], [5, 8], [6, 8], [7, 8], [8, 8],
+        [8, 7], [8, 6], [8, 5], [8, 4], [8, 3],
+        [7, 3], [6, 3], [5, 3], [4, 3], [3, 3],
+        [3, 4], [3, 5], [3, 6], [3, 7],
+        [4, 7], [5, 7], [6, 7], [7, 7],
+        [7, 6], [7, 5], [7, 4],
+        [6, 4], [5, 4], [4, 4],
+        [4, 5], [4, 6],
+        [5, 6], [6, 6],
+        [6, 5],
+        [5, 5]  // Finish position
+      ],
+      
+      // Special tiles - index in path array and effect
+      specialTiles: {
+        4: { type: 'wormhole', name: 'Wormhole', description: 'Teleport ahead 5 spaces!', effect: 'move_forward', params: { spaces: 5 } },
+        10: { type: 'asteroid', name: 'Asteroid Field', description: 'Dodge the asteroids! Lose a turn.', effect: 'lose_turn' },
+        15: { type: 'alien', name: 'Friendly Alien', description: 'Aliens help you on your journey! Move forward 3 spaces.', effect: 'move_forward', params: { spaces: 3 } },
+        22: { type: 'black_hole', name: 'Black Hole', description: 'Pulled into a black hole! Go back to start.', effect: 'go_to_start' },
+        28: { type: 'meteor', name: 'Meteor Shower', description: 'Take cover! Move back 2 spaces.', effect: 'move_backward', params: { spaces: 2 } },
+        35: { type: 'space_station', name: 'Space Station', description: 'Refuel at the station! Roll again.', effect: 'extra_turn' },
+        42: { type: 'comet', name: 'Comet', description: 'Ride a comet across the galaxy! Move forward 4 spaces.', effect: 'move_forward', params: { spaces: 4 } },
+        50: { type: 'ufo', name: 'UFO Encounter', description: 'Aliens abduct you! Skip your next turn.', effect: 'lose_turn' },
+        60: { type: 'wormhole', name: 'Wormhole', description: 'Another wormhole! Teleport ahead 7 spaces!', effect: 'move_forward', params: { spaces: 7 } },
+        70: { type: 'meteor', name: 'Meteor Shower', description: 'Meteors incoming! Move back 3 spaces.', effect: 'move_backward', params: { spaces: 3 } },
+        78: { type: 'space_station', name: 'Space Station', description: 'Last refuel before the final stretch! Roll again.', effect: 'extra_turn' }
+      }
+    };
+
+    // Game state
+    let gameState = {
+      phase: 'setup', // setup, playing, gameover
+      players: [],
+      currentPlayerIndex: 0,
+      dice: 0,
+      animating: false
+    };
+
+    // DOM elements
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const gameBoard = document.getElementById('game-board');
+    const effectPopup = document.getElementById('effect-popup');
+    const statusMessage = document.getElementById('status-message');
+    const playerCountSelect = document.getElementById('player-count');
+    const startButton = document.getElementById('start-button');
+    const rollButton = document.getElementById('roll-button');
+    const diceElement = document.getElementById('dice');
+    const playersContainer = document.getElementById('players-container');
+
+    // Initialize board
+    function initializeBoard() {
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw board background
+      ctx.fillStyle = '#f5f5f5';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw path
+      gameConfig.path.forEach((pos, index) => {
+        const [x, y] = pos;
+        const xPos = gameConfig.padding + (x - 1) * gameConfig.tileSize;
+        const yPos = gameConfig.padding + (y - 1) * gameConfig.tileSize;
+        
+        // Default tile color
+        let tileColor = '#ffffff';
+        
+        // Special tile colors
+        if (index === 0) {
+          tileColor = '#4CAF50'; // Start
+        } else if (index === gameConfig.path.length - 1) {
+          tileColor = '#FF5722'; // Finish
+        } else if (gameConfig.specialTiles[index]) {
+          // Color based on special tile type
+          switch (gameConfig.specialTiles[index].type) {
+            case 'wormhole': tileColor = '#9C27B0'; break;
+            case 'asteroid': tileColor = '#795548'; break;
+            case 'alien': tileColor = '#8BC34A'; break;
+            case 'black_hole': tileColor = '#263238'; break;
+            case 'meteor': tileColor = '#FF9800'; break;
+            case 'space_station': tileColor = '#2196F3'; break;
+            case 'comet': tileColor = '#03A9F4'; break;
+            case 'ufo': tileColor = '#673AB7'; break;
+          }
+        }
+        
+        // Draw tile background
+        ctx.fillStyle = tileColor;
+        ctx.fillRect(xPos, yPos, gameConfig.tileSize, gameConfig.tileSize);
+        
+        // Draw tile border
+        ctx.strokeStyle = '#333333';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(xPos, yPos, gameConfig.tileSize, gameConfig.tileSize);
+        
+        // Draw tile number
+        ctx.fillStyle = (tileColor === '#263238') ? '#ffffff' : '#000000';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(index, xPos + gameConfig.tileSize / 2, yPos + gameConfig.tileSize / 2);
+        
+        // Draw special tile icons
+        if (gameConfig.specialTiles[index]) {
+          drawTileIcon(gameConfig.specialTiles[index].type, xPos + gameConfig.tileSize / 2, yPos + gameConfig.tileSize / 2 + 10);
+        }
+      });
+      
+      // Draw start and finish text
+      ctx.font = 'bold 16px Arial';
+      
+      // Start
+      const [startX, startY] = gameConfig.path[0];
+      const startXPos = gameConfig.padding + (startX - 1) * gameConfig.tileSize;
+      const startYPos = gameConfig.padding + (startY - 1) * gameConfig.tileSize;
+      ctx.fillStyle = 'white';
+      ctx.fillText('START', startXPos + gameConfig.tileSize / 2, startYPos + gameConfig.tileSize / 2 - 10);
+      
+      // Finish
+      const [finishX, finishY] = gameConfig.path[gameConfig.path.length - 1];
+      const finishXPos = gameConfig.padding + (finishX - 1) * gameConfig.tileSize;
+      const finishYPos = gameConfig.padding + (finishY - 1) * gameConfig.tileSize;
+      ctx.fillStyle = 'white';
+      ctx.fillText('FINISH', finishXPos + gameConfig.tileSize / 2, finishYPos + gameConfig.tileSize / 2 - 10);
+      
+      // Draw title
+      ctx.save();
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate((-10 * Math.PI) / 180);
+      
+      // Title background
+      ctx.fillStyle = 'white';
+      ctx.strokeStyle = '#333333';
+      ctx.lineWidth = 2;
+      ctx.fillRect(-120, -40, 240, 80);
+      ctx.strokeRect(-120, -40, 240, 80);
+      
+      // Title text
+      ctx.fillStyle = '#2980b9';
+      ctx.font = 'bold 24px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('SPACE', 0, -10);
+      ctx.fillText('ADVENTURE', 0, 20);
+      ctx.restore();
+      
+      // Draw decorative elements
+      drawDecorativeElements();
+    }
+
+    // Draw special tile icons
+    function drawTileIcon(type, x, y) {
+      ctx.fillStyle = '#333333';
+      
+      switch (type) {
+        case 'wormhole':
+          ctx.beginPath();
+          ctx.arc(x, y, 6, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#9C27B0';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(x, y, 10, 0, Math.PI * 2);
+          ctx.stroke();
+          break;
+          
+        case 'asteroid':
+          ctx.beginPath();
+          ctx.moveTo(x - 8, y - 5);
+          ctx.lineTo(x - 2, y - 8);
+          ctx.lineTo(x + 4, y - 3);
+          ctx.lineTo(x + 8, y + 2);
+          ctx.lineTo(x + 3, y + 8);
+          ctx.lineTo(x - 5, y + 5);
+          ctx.lineTo(x - 8, y - 5);
+          ctx.fill();
+          break;
+          
+        case 'alien':
+          // Alien head
+          ctx.beginPath();
+          ctx.arc(x, y - 3, 7, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // Alien eyes
+          ctx.fillStyle = 'white';
+          ctx.beginPath();
+          ctx.arc(x - 3, y - 5, 2, 0, Math.PI * 2);
+          ctx.arc(x + 3, y - 5, 2, 0, Math.PI * 2);
+          ctx.fill();
+          break;
+          
+        case 'black_hole':
+          ctx.beginPath();
+          ctx.arc(x, y, 10, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#9E9E9E';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(x, y, 12, 0, Math.PI * 1.5);
+          ctx.stroke();
+          break;
+          
+        case 'meteor':
+          ctx.beginPath();
+          ctx.moveTo(x - 5, y - 7);
+          ctx.lineTo(x + 7, y + 5);
+          ctx.lineTo(x, y + 7);
+          ctx.lineTo(x - 7, y);
+          ctx.closePath();
+          ctx.fill();
+          break;
+          
+        case 'space_station':
+          ctx.fillRect(x - 8, y - 3, 16, 6);
+          ctx.fillRect(x - 3, y - 8, 6, 16);
+          ctx.strokeStyle = '#2196F3';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(x, y, 10, 0, Math.PI * 2);
+          ctx.stroke();
+          break;
+          
+        case 'comet':
+          ctx.beginPath();
+          ctx.arc(x, y, 5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#03A9F4';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(x - 5, y - 5);
+          ctx.lineTo(x - 10, y - 10);
+          ctx.stroke();
+          break;
+          
+        case 'ufo':
+          // UFO body
+          ctx.beginPath();
+          ctx.ellipse(x, y, 10, 4, 0, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // UFO top
+          ctx.beginPath();
+          ctx.arc(x, y - 3, 5, Math.PI, 0);
+          ctx.fill();
+          break;
+      }
+    }
+
+    // Draw decorative elements
+    function drawDecorativeElements() {
+      // Draw sun
+      ctx.fillStyle = '#FFD700';
+      ctx.beginPath();
+      ctx.arc(550, 550, 30, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Sun rays
+      ctx.strokeStyle = '#FFA500';
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 8; i++) {
+        const angle = (i * Math.PI) / 4;
+        ctx.beginPath();
+        ctx.moveTo(
+          550 + Math.cos(angle) * 30,
+          550 + Math.sin(angle) * 30
+        );
+        ctx.lineTo(
+          550 + Math.cos(angle) * 45,
+          550 + Math.sin(angle) * 45
+        );
+        ctx.stroke();
+      }
+      
+      // Draw planets
+      // Planet 1
+      ctx.fillStyle = '#9C27B0';
+      ctx.beginPath();
+      ctx.arc(80, 60, 15, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Planet 2
+      ctx.fillStyle = '#607D8B';
+      ctx.beginPath();
+      ctx.arc(520, 120, 20, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Planet 3
+      ctx.fillStyle = '#8BC34A';
+      ctx.beginPath();
+      ctx.arc(90, 520, 18, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Draw rocket
+      ctx.save();
+      ctx.translate(480, 450);
+      ctx.rotate((-45 * Math.PI) / 180);
+      
+      // Rocket body
+      ctx.fillStyle = '#F44336';
+      ctx.beginPath();
+      ctx.moveTo(0, -15);
+      ctx.lineTo(8, 5);
+      ctx.lineTo(-8, 5);
+      ctx.closePath();
+      ctx.fill();
+      
+      ctx.fillStyle = '#9E9E9E';
+      ctx.fillRect(-6, 5, 12, 15);
+      
+      ctx.fillStyle = '#2196F3';
+      ctx.beginPath();
+      ctx.arc(-3, 10, 2, 0, Math.PI * 2);
+      ctx.arc(3, 10, 2, 0, Math.PI * 2);
+      ctx.arc(0, 15, 2, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.restore();
+      
+      // Draw stars
+      ctx.fillStyle = 'white';
+      const stars = [
+        [50, 100], [120, 40], [200, 80], [350, 30], [450, 70],
+        [500, 200], [550, 300], [500, 400], [400, 500], [300, 550],
+        [150, 500], [70, 400], [30, 300], [50, 200]
+      ];
+      
+      stars.forEach(([x, y]) => {
+        ctx.beginPath();
+        ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    // Create player tokens
+    function createPlayerTokens() {
+      // Remove existing tokens
+      const existingTokens = document.querySelectorAll('.player-token');
+      existingTokens.forEach(token => token.remove());
+      
+      // Create tokens for each player
+      gameState.players.forEach((player, index) => {
+        const token = document.createElement('div');
+        token.className = 'player-token';
+        token.id = `player-${index}`;
+        token.style.backgroundColor = player.color;
+        token.textContent = index + 1;
+        
+        // Position at start
+        const [startX, startY] = gameConfig.path[player.position];
+        const left = gameConfig.padding + (startX - 1) * gameConfig.tileSize + (gameConfig.tileSize / 2) - 15;
+        const top = gameConfig.padding + (startY - 1) * gameConfig.tileSize + (gameConfig.tileSize / 2) - 15 + (index * 7);
+        
+        token.style.left = `${left}px`;
+        token.style.top = `${top}px`;
+        
+        gameBoard.appendChild(token);
+      
