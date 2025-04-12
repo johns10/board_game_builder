@@ -14,6 +14,8 @@ let playerCountSelect;
 let startButton;
 let rollButton;
 let playersContainer;
+let diceElement;
+let diceFace;
 
 // Initialize game
 document.addEventListener('DOMContentLoaded', () => {
@@ -23,6 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
     startButton = document.getElementById('start-button');
     rollButton = document.getElementById('roll-button');
     playersContainer = document.getElementById('players-container');
+    diceElement = document.getElementById('dice');
+    diceFace = diceElement.querySelector('.dice-face');
     
     // Initialize renderer
     renderer = new BoardRenderer('gameCanvas', gameConfig);
@@ -83,17 +87,31 @@ function handleRoll() {
         return;
     }
     
-    // Roll dice
-    const roll = Math.floor(Math.random() * 6) + 1;
-    gameState.dice = roll;
+    // Disable roll button during animation
+    rollButton.disabled = true;
     
-    // Update status
-    updateStatusMessage(`Player ${currentPlayer.index + 1} rolled a ${roll}!`);
+    // Start rolling animation
+    diceFace.removeAttribute('data-value');
+    diceFace.classList.add('rolling');
     
-    // Move player
+    // Roll dice after a short delay
     setTimeout(() => {
-        movePlayer(currentPlayer, roll);
-    }, 1000);
+        const roll = Math.floor(Math.random() * 6) + 1;
+        gameState.dice = roll;
+        
+        // Stop rolling animation and show result
+        diceFace.classList.remove('rolling');
+        diceFace.setAttribute('data-value', roll.toString());
+        
+        // Update status
+        updateStatusMessage(`Player ${currentPlayer.index + 1} rolled a ${roll}!`);
+        
+        // Move player after showing dice
+        setTimeout(() => {
+            movePlayer(currentPlayer, roll);
+            rollButton.disabled = false;
+        }, 1000);
+    }, 600);
 }
 
 function movePlayer(player, spaces) {
