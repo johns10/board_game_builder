@@ -293,23 +293,77 @@ class BoardRenderer {
             const tokenX = xPos - 15 + offset;
             const tokenY = yPos - 15;
             
-            // Token background
-            this.ctx.fillStyle = player.color;
-            this.ctx.beginPath();
-            this.ctx.arc(tokenX, tokenY, 12, 0, Math.PI * 2);
-            this.ctx.fill();
+            // Create temporary image for avatar
+            const avatar = new Image();
             
-            // Token border
-            this.ctx.strokeStyle = 'white';
-            this.ctx.lineWidth = 2;
-            this.ctx.stroke();
+            // Draw fallback circle
+            const drawColorCircle = () => {
+                this.ctx.fillStyle = player.color;
+                this.ctx.beginPath();
+                this.ctx.arc(tokenX, tokenY, 12, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Token border
+                this.ctx.strokeStyle = 'white';
+                this.ctx.lineWidth = 2;
+                this.ctx.stroke();
+                
+                // Player number
+                this.ctx.fillStyle = 'white';
+                this.ctx.font = 'bold 14px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+                this.ctx.fillText(player.index + 1, tokenX, tokenY);
+            };
             
-            // Player number
-            this.ctx.fillStyle = 'white';
-            this.ctx.font = 'bold 14px Arial';
-            this.ctx.textAlign = 'center';
-            this.ctx.textBaseline = 'middle';
-            this.ctx.fillText(player.index + 1, tokenX, tokenY);
+            // Try SVG first
+            avatar.src = player.avatarSvg;
+            
+            const tryPng = () => {
+                const pngAvatar = new Image();
+                pngAvatar.src = player.avatarPng;
+                
+                pngAvatar.onload = () => {
+                    // Draw PNG avatar
+                    this.ctx.save();
+                    this.ctx.beginPath();
+                    this.ctx.arc(tokenX, tokenY, 12, 0, Math.PI * 2);
+                    this.ctx.clip();
+                    this.ctx.drawImage(pngAvatar, tokenX - 12, tokenY - 12, 24, 24);
+                    this.ctx.restore();
+                    
+                    // Draw border
+                    this.ctx.strokeStyle = 'white';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.beginPath();
+                    this.ctx.arc(tokenX, tokenY, 12, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                };
+                
+                pngAvatar.onerror = drawColorCircle;
+            };
+            
+            avatar.onload = () => {
+                // Draw SVG avatar
+                this.ctx.save();
+                this.ctx.beginPath();
+                this.ctx.arc(tokenX, tokenY, 12, 0, Math.PI * 2);
+                this.ctx.clip();
+                this.ctx.drawImage(avatar, tokenX - 12, tokenY - 12, 24, 24);
+                this.ctx.restore();
+                
+                // Draw border
+                this.ctx.strokeStyle = 'white';
+                this.ctx.lineWidth = 2;
+                this.ctx.beginPath();
+                this.ctx.arc(tokenX, tokenY, 12, 0, Math.PI * 2);
+                this.ctx.stroke();
+            };
+            
+            avatar.onerror = tryPng;
+            
+            // Draw fallback while loading
+            drawColorCircle();
         });
     }
 }

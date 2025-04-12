@@ -49,7 +49,10 @@ function startGame() {
         gameState.players.push({
             index: i,
             position: 0,
-            color: gameConfig.playerColors[i],
+            avatar: gameConfig.players[i].avatar, // Base path without extension
+            avatarPng: `${gameConfig.players[i].avatar}.png`,
+            avatarSvg: `${gameConfig.players[i].avatar}.svg`,
+            color: gameConfig.players[i].color, // fallback color
             skipTurn: false
         });
     }
@@ -235,19 +238,37 @@ function updateUI() {
         playerDiv.style.gap = '12px';
         playerDiv.style.transition = 'all 0.3s ease';
         
-        const colorIndicator = document.createElement('span');
-        colorIndicator.style.display = 'inline-block';
-        colorIndicator.style.width = '24px';
-        colorIndicator.style.height = '24px';
-        colorIndicator.style.backgroundColor = player.color;
-        colorIndicator.style.borderRadius = '50%';
-        colorIndicator.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+        const avatarImg = document.createElement('img');
+        // Try SVG first, fallback to PNG
+        avatarImg.src = player.avatarSvg;
+        avatarImg.style.display = 'inline-block';
+        avatarImg.style.width = '24px';
+        avatarImg.style.height = '24px';
+        avatarImg.style.borderRadius = '50%';
+        avatarImg.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+        avatarImg.style.objectFit = 'cover';
+        avatarImg.onerror = () => {
+            // Try PNG if SVG fails
+            avatarImg.src = player.avatarPng;
+            avatarImg.onerror = () => {
+                // Fallback to color if both SVG and PNG fail
+                avatarImg.style.display = 'none';
+                const colorFallback = document.createElement('span');
+                colorFallback.style.display = 'inline-block';
+                colorFallback.style.width = '24px';
+                colorFallback.style.height = '24px';
+                colorFallback.style.backgroundColor = player.color;
+                colorFallback.style.borderRadius = '50%';
+                colorFallback.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+                avatarImg.parentNode.insertBefore(colorFallback, avatarImg);
+            };
+        };
         
         const text = document.createElement('span');
         text.style.fontWeight = index === gameState.currentPlayerIndex ? 'bold' : 'normal';
         text.textContent = `Player ${index + 1}`;
         
-        playerDiv.appendChild(colorIndicator);
+        playerDiv.appendChild(avatarImg);
         playerDiv.appendChild(text);
         playersContainer.appendChild(playerDiv);
     });

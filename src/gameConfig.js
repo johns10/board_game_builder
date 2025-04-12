@@ -7,8 +7,13 @@ const gameConfig = {
     // Game settings
     diceRange: [1, 6],
     
-    // Player colors
-    playerColors: ['#e74c3c', '#3498db', '#2ecc71', '#f39c12'],
+    // Player avatars and fallback colors
+    players: [
+        { avatar: 'images/avatars/player1', color: '#e74c3c' },
+        { avatar: 'images/avatars/player2', color: '#3498db' },
+        { avatar: 'images/avatars/player3', color: '#2ecc71' },
+        { avatar: 'images/avatars/player4', color: '#f39c12' }
+    ],
     
     // Path definition - [x, y] coordinates for each tile
     path: [
