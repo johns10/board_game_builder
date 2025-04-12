@@ -16,17 +16,23 @@
         
         <div id="controls">
         <div id="setup-controls" class="control-section">
-            <div class="control-row">
-                <div class="select-container">
-                    <label for="player-count">Number of Players: </label>
-                    <select id="player-count">
-                        <option value="2">2 Players</option>
-                        <option value="3">3 Players</option>
-                        <option value="4">4 Players</option>
-                    </select>
+            <div class="player-counter">
+                <label>Human Players:</label>
+                <div class="counter-controls">
+                    <button class="counter-btn" id="human-minus">-</button>
+                    <span id="human-count">1</span>
+                    <button class="counter-btn" id="human-plus">+</button>
                 </div>
-                <button id="start-button" class="primary-button">Start Game</button>
             </div>
+            <div class="player-counter">
+                <label>Computer Players:</label>
+                <div class="counter-controls">
+                    <button class="counter-btn" id="computer-minus">-</button>
+                    <span id="computer-count">1</span>
+                    <button class="counter-btn" id="computer-plus">+</button>
+                </div>
+            </div>
+            <button id="start-button" class="primary-button">Start Game</button>
         </div>
 
         <div id="game-controls" class="control-section">

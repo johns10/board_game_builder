@@ -4,29 +4,43 @@ let gameState = {
     players: [],
     currentPlayerIndex: 0,
     dice: 0,
-    animating: false
+    animating: false,
+    humanCount: 1,
+    computerCount: 1
 };
 
 // DOM elements
 let renderer;
 let statusMessage;
-let playerCountSelect;
 let startButton;
 let rollButton;
 let playersContainer;
 let diceElement;
 let diceFace;
+let humanCount;
+let computerCount;
+let humanPlus;
+let humanMinus;
+let computerPlus;
+let computerMinus;
 
 // Initialize game
 document.addEventListener('DOMContentLoaded', () => {
     // Get DOM elements
     statusMessage = document.getElementById('status-message');
-    playerCountSelect = document.getElementById('player-count');
     startButton = document.getElementById('start-button');
     rollButton = document.getElementById('roll-button');
     playersContainer = document.getElementById('players-container');
     diceElement = document.getElementById('dice');
     diceFace = diceElement.querySelector('.dice-face');
+    
+    // Get counter elements
+    humanCount = document.getElementById('human-count');
+    computerCount = document.getElementById('computer-count');
+    humanPlus = document.getElementById('human-plus');
+    humanMinus = document.getElementById('human-minus');
+    computerPlus = document.getElementById('computer-plus');
+    computerMinus = document.getElementById('computer-minus');
     
     // Initialize renderer
     renderer = new BoardRenderer('gameCanvas', gameConfig);
@@ -37,24 +51,82 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set up event listeners
     startButton.addEventListener('click', startGame);
     rollButton.addEventListener('click', handleRoll);
+    
+    // Set up counter buttons
+    humanPlus.addEventListener('click', () => updatePlayerCount('human', 1));
+    humanMinus.addEventListener('click', () => updatePlayerCount('human', -1));
+    computerPlus.addEventListener('click', () => updatePlayerCount('computer', 1));
+    computerMinus.addEventListener('click', () => updatePlayerCount('computer', -1));
+    
+    // Initialize button states
+    updateCounterButtons();
 });
 
-function startGame() {
-    // Get number of players
-    const playerCount = parseInt(playerCountSelect.value);
+function updatePlayerCount(type, change) {
+    const total = gameState.humanCount + gameState.computerCount;
     
+    if (type === 'human') {
+        const newCount = gameState.humanCount + change;
+        if (newCount >= 0 && newCount <= 4 && total + change <= 4) {
+            gameState.humanCount = newCount;
+            humanCount.textContent = newCount;
+        }
+    } else {
+        const newCount = gameState.computerCount + change;
+        if (newCount >= 0 && newCount <= 4 && total + change <= 4) {
+            gameState.computerCount = newCount;
+            computerCount.textContent = newCount;
+        }
+    }
+    
+    updateCounterButtons();
+}
+
+function updateCounterButtons() {
+    const total = gameState.humanCount + gameState.computerCount;
+    
+    humanMinus.disabled = gameState.humanCount <= 0;
+    humanPlus.disabled = gameState.humanCount >= 4 || total >= 4;
+    
+    computerMinus.disabled = gameState.computerCount <= 0;
+    computerPlus.disabled = gameState.computerCount >= 4 || total >= 4;
+    
+    startButton.disabled = total < 2;
+}
+
+function startGame() {
     // Initialize players
     gameState.players = [];
-    for (let i = 0; i < playerCount; i++) {
+    let playerIndex = 0;
+    
+    // Add human players
+    for (let i = 0; i < gameState.humanCount; i++) {
         gameState.players.push({
-            index: i,
+            index: playerIndex,
             position: 0,
-            avatar: gameConfig.players[i].avatar, // Base path without extension
-            avatarPng: `${gameConfig.players[i].avatar}.png`,
-            avatarSvg: `${gameConfig.players[i].avatar}.svg`,
-            color: gameConfig.players[i].color, // fallback color
-            skipTurn: false
+            avatar: gameConfig.players[playerIndex].avatar,
+            avatarPng: `${gameConfig.players[playerIndex].avatar}.png`,
+            avatarSvg: `${gameConfig.players[playerIndex].avatar}.svg`,
+            color: gameConfig.players[playerIndex].color,
+            skipTurn: false,
+            type: 'human'
         });
+        playerIndex++;
+    }
+    
+    // Add computer players
+    for (let i = 0; i < gameState.computerCount; i++) {
+        gameState.players.push({
+            index: playerIndex,
+            position: 0,
+            avatar: gameConfig.players[playerIndex].avatar,
+            avatarPng: `${gameConfig.players[playerIndex].avatar}.png`,
+            avatarSvg: `${gameConfig.players[playerIndex].avatar}.svg`,
+            color: gameConfig.players[playerIndex].color,
+            skipTurn: false,
+            type: 'computer'
+        });
+        playerIndex++;
     }
     
     // Update game state
@@ -64,21 +136,70 @@ function startGame() {
     // Update UI
     updateUI();
     
-    // Enable roll button
-    rollButton.disabled = false;
+    // Enable roll button for human player
+    rollButton.disabled = gameState.players[0].type === 'computer';
     
-    // Disable player count and start button
-    playerCountSelect.disabled = true;
+    // Disable counter buttons and start button
+    humanPlus.disabled = true;
+    humanMinus.disabled = true;
+    computerPlus.disabled = true;
+    computerMinus.disabled = true;
     startButton.disabled = true;
     
     // Show initial status
     updateStatusMessage(`Player 1's turn to roll!`);
+    
+    // If first player is computer, start their turn
+    if (gameState.players[0].type === 'computer') {
+        setTimeout(handleComputerTurn, 1000);
+    }
+}
+
+function handleComputerTurn() {
+    if (gameState.phase !== 'playing' || gameState.animating) return;
+    
+    const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+    
+    // Check if player should skip turn
+    if (currentPlayer.skipTurn) {
+        currentPlayer.skipTurn = false;
+        updateStatusMessage(`Player ${currentPlayer.index + 1} loses their turn!`);
+        setTimeout(() => {
+            nextTurn();
+        }, 1000);
+        return;
+    }
+    
+    // Start rolling animation
+    diceFace.removeAttribute('data-value');
+    diceFace.classList.add('rolling');
+    
+    // Roll dice after a short delay
+    setTimeout(() => {
+        const roll = Math.floor(Math.random() * 6) + 1;
+        gameState.dice = roll;
+        
+        // Stop rolling animation and show result
+        diceFace.classList.remove('rolling');
+        diceFace.setAttribute('data-value', roll.toString());
+        
+        // Update status
+        updateStatusMessage(`Player ${currentPlayer.index + 1} rolled a ${roll}!`);
+        
+        // Move player after showing dice
+        setTimeout(() => {
+            movePlayer(currentPlayer, roll);
+        }, 1000);
+    }, 600);
 }
 
 function handleRoll() {
     if (gameState.phase !== 'playing' || gameState.animating) return;
     
     const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+    
+    // Only allow human players to click roll button
+    if (currentPlayer.type === 'computer') return;
     
     // Check if player should skip turn
     if (currentPlayer.skipTurn) {
@@ -206,20 +327,36 @@ function handleSpecialTile(player, tile) {
 
 function handleWin(player) {
     gameState.phase = 'gameover';
-    updateStatusMessage(`Player ${player.index + 1} wins!`);
+    updateStatusMessage(`${player.type === 'computer' ? 'Computer' : 'Player'} ${player.index + 1} wins!`);
     rollButton.disabled = true;
     
-    // Enable start button for new game
+    // Re-enable all controls for new game
     startButton.disabled = false;
-    playerCountSelect.disabled = false;
+    humanPlus.disabled = false;
+    humanMinus.disabled = false;
+    computerPlus.disabled = false;
+    computerMinus.disabled = false;
+    
+    // Reset counters to initial state
+    updateCounterButtons();
 }
 
 function nextTurn() {
     if (gameState.phase !== 'playing') return;
     
     gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % gameState.players.length;
-    updateStatusMessage(`Player ${gameState.currentPlayerIndex + 1}'s turn to roll!`);
+    const nextPlayer = gameState.players[gameState.currentPlayerIndex];
+    
+    updateStatusMessage(`Player ${nextPlayer.index + 1}'s turn to roll!`);
     updateUI();
+    
+    // Enable/disable roll button based on player type
+    rollButton.disabled = nextPlayer.type === 'computer';
+    
+    // If next player is computer, start their turn
+    if (nextPlayer.type === 'computer') {
+        setTimeout(handleComputerTurn, 1000);
+    }
 }
 
 function updateUI() {
@@ -227,11 +364,11 @@ function updateUI() {
     playersContainer.innerHTML = '';
     
     // Add player indicators
-    gameState.players.forEach((player, index) => {
+    gameState.players.forEach((player) => {
         const playerDiv = document.createElement('div');
         playerDiv.style.padding = '12px 20px';
         playerDiv.style.borderRadius = '8px';
-        playerDiv.style.backgroundColor = index === gameState.currentPlayerIndex ? '#e3f2fd' : 'transparent';
+        playerDiv.style.backgroundColor = player.index === gameState.currentPlayerIndex ? '#e3f2fd' : 'transparent';
         playerDiv.style.border = `2px solid ${player.color}`;
         playerDiv.style.display = 'flex';
         playerDiv.style.alignItems = 'center';
@@ -265,8 +402,8 @@ function updateUI() {
         };
         
         const text = document.createElement('span');
-        text.style.fontWeight = index === gameState.currentPlayerIndex ? 'bold' : 'normal';
-        text.textContent = `Player ${index + 1}`;
+        text.style.fontWeight = player.index === gameState.currentPlayerIndex ? 'bold' : 'normal';
+        text.textContent = `${player.type === 'computer' ? 'Computer' : 'Player'} ${player.index + 1}`;
         
         playerDiv.appendChild(avatarImg);
         playerDiv.appendChild(text);
