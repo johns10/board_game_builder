@@ -2,15 +2,66 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 20px;
-    background-color: #f0f0f0;
+    background-color: black;
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: relative;
+    min-height: 100vh;
+}
+
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(1px 1px at 20px 30px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 40px 70px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 50px 160px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 80px 120px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 110px 130px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 140px 80px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 170px 40px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 200px 90px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 230px 150px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 260px 60px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 290px 110px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 320px 40px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 350px 80px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 380px 120px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 25px 50px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 45px 90px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 55px 180px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 85px 140px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 115px 150px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 145px 100px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 175px 60px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 205px 110px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 235px 170px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 265px 80px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 295px 130px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 325px 60px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 355px 100px, white, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 385px 140px, white, rgba(0,0,0,0));
+    background-size: 400px 400px;
+    background-repeat: repeat;
+    z-index: -1;
+    animation: twinkle 3s ease-in-out infinite;
 }
 
 h1 {
-    color: #2c3e50;
+    color: white;
     margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+@keyframes twinkle {
+    0% { opacity: 0.3; }
+    50% { opacity: 1; }
+    100% { opacity: 0.3; }
 }
 
 #game-container {
