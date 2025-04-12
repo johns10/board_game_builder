@@ -95,6 +95,9 @@ function updateCounterButtons() {
 }
 
 function startGame() {
+    // Add game-started class to container
+    document.getElementById('game-container').classList.add('game-started');
+    
     // Initialize players
     gameState.players = [];
     let playerIndex = 0;
@@ -388,6 +391,9 @@ function handleWin(player) {
     gameState.phase = 'gameover';
     updateStatusMessage(`${player.type === 'computer' ? 'Computer' : 'Player'} ${player.index + 1} wins!`);
     rollButton.disabled = true;
+    
+    // Remove game-started class to reset UI
+    document.getElementById('game-container').classList.remove('game-started');
     
     // Re-enable all controls for new game
     startButton.disabled = false;
