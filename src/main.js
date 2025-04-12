@@ -109,7 +109,8 @@ function startGame() {
             avatarSvg: `${gameConfig.players[playerIndex].avatar}.svg`,
             color: gameConfig.players[playerIndex].color,
             skipTurn: false,
-            type: 'human'
+            type: 'human',
+            hearts: 5
         });
         playerIndex++;
     }
@@ -124,7 +125,8 @@ function startGame() {
             avatarSvg: `${gameConfig.players[playerIndex].avatar}.svg`,
             color: gameConfig.players[playerIndex].color,
             skipTurn: false,
-            type: 'computer'
+            type: 'computer',
+            hearts: 5
         });
         playerIndex++;
     }
@@ -296,33 +298,90 @@ function handleSpecialTile(player, tile) {
                 movePlayer(player, tile.params.spaces);
                 break;
                 
-            case 'move_backward':
-                const newPos = Math.max(0, player.position - tile.params.spaces);
-                animateMovement(player, newPos, () => {
+            case 'lose_hearts':
+                player.hearts = Math.max(0, player.hearts - tile.params.hearts);
+                updateUI();
+                if (player.hearts === 0) {
+                    handlePlayerLoss(player);
+                } else {
                     gameState.animating = false;
                     nextTurn();
-                });
+                }
                 break;
                 
-            case 'lose_turn':
-                player.skipTurn = true;
+            case 'gain_hearts':
+                player.hearts = Math.min(5, player.hearts + tile.params.hearts);
+                updateUI();
                 gameState.animating = false;
                 nextTurn();
                 break;
                 
-            case 'extra_turn':
+            case 'black_hole':
+                player.hearts = Math.max(0, player.hearts - tile.params.hearts);
+                updateUI();
+                if (player.hearts === 0) {
+                    handlePlayerLoss(player);
+                } else {
+                    animateMovement(player, 0, () => {
+                        gameState.animating = false;
+                        nextTurn();
+                    });
+                }
+                break;
+                
+            case 'meteor_hit':
+                player.hearts = Math.max(0, player.hearts - tile.params.hearts);
+                updateUI();
+                if (player.hearts === 0) {
+                    handlePlayerLoss(player);
+                } else {
+                    const newPos = Math.max(0, player.position - tile.params.spaces);
+                    animateMovement(player, newPos, () => {
+                        gameState.animating = false;
+                        nextTurn();
+                    });
+                }
+                break;
+                
+            case 'space_station':
+                player.hearts = Math.min(5, player.hearts + tile.params.hearts);
+                updateUI();
                 gameState.animating = false;
                 updateStatusMessage(`Player ${player.index + 1} gets another turn!`);
                 break;
                 
-            case 'go_to_start':
-                animateMovement(player, 0, () => {
+            case 'ufo_abduction':
+                player.hearts = Math.max(0, player.hearts - tile.params.hearts);
+                player.skipTurn = true;
+                updateUI();
+                if (player.hearts === 0) {
+                    handlePlayerLoss(player);
+                } else {
                     gameState.animating = false;
                     nextTurn();
-                });
+                }
                 break;
         }
     }, 1000);
+}
+
+function handlePlayerLoss(player) {
+    updateStatusMessage(`Player ${player.index + 1} lost all hearts and is out of the game!`);
+    
+    // Remove player from game
+    gameState.players = gameState.players.filter(p => p !== player);
+    
+    // If only one player remains, they win
+    if (gameState.players.length === 1) {
+        handleWin(gameState.players[0]);
+    } else {
+        // Adjust currentPlayerIndex if needed
+        if (gameState.currentPlayerIndex >= gameState.players.length) {
+            gameState.currentPlayerIndex = 0;
+        }
+        gameState.animating = false;
+        nextTurn();
+    }
 }
 
 function handleWin(player) {
@@ -401,12 +460,31 @@ function updateUI() {
             };
         };
         
+        const playerInfo = document.createElement('div');
+        playerInfo.style.display = 'flex';
+        playerInfo.style.flexDirection = 'column';
+        playerInfo.style.alignItems = 'flex-start';
+        playerInfo.style.gap = '5px';
+        
         const text = document.createElement('span');
+        text.className = 'player-name';
         text.style.fontWeight = player.index === gameState.currentPlayerIndex ? 'bold' : 'normal';
         text.textContent = `${player.type === 'computer' ? 'Computer' : 'Player'} ${player.index + 1}`;
         
+        const hearts = document.createElement('div');
+        hearts.className = 'hearts';
+        
+        for (let i = 0; i < 5; i++) {
+            const heart = document.createElement('span');
+            heart.textContent = i < player.hearts ? '❤️' : '🖤';
+            hearts.appendChild(heart);
+        }
+        
+        playerInfo.appendChild(text);
+        playerInfo.appendChild(hearts);
+        
         playerDiv.appendChild(avatarImg);
-        playerDiv.appendChild(text);
+        playerDiv.appendChild(playerInfo);
         playersContainer.appendChild(playerDiv);
     });
     

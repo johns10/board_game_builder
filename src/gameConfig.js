@@ -42,13 +42,13 @@ const gameConfig = {
     // Special tiles configuration
     specialTiles: {
         4: { type: 'wormhole', name: 'Wormhole', description: 'Teleport ahead 5 spaces!', effect: 'move_forward', params: { spaces: 5 } },
-        10: { type: 'asteroid', name: 'Asteroid Field', description: 'Dodge the asteroids! Lose a turn.', effect: 'lose_turn' },
-        15: { type: 'alien', name: 'Friendly Alien', description: 'Aliens help you on your journey! Move forward 3 spaces.', effect: 'move_forward', params: { spaces: 3 } },
-        22: { type: 'black_hole', name: 'Black Hole', description: 'Pulled into a black hole! Go back to start.', effect: 'go_to_start' },
-        28: { type: 'meteor', name: 'Meteor Shower', description: 'Take cover! Move back 2 spaces.', effect: 'move_backward', params: { spaces: 2 } },
-        35: { type: 'space_station', name: 'Space Station', description: 'Refuel at the station! Roll again.', effect: 'extra_turn' },
+        10: { type: 'asteroid', name: 'Asteroid Field', description: 'Hit by asteroids! Lose 1 heart.', effect: 'lose_hearts', params: { hearts: 1 } },
+        15: { type: 'alien', name: 'Friendly Alien', description: 'Aliens heal you! Gain 1 heart.', effect: 'gain_hearts', params: { hearts: 1 } },
+        22: { type: 'black_hole', name: 'Black Hole', description: 'Pulled into a black hole! Go back to start and lose 2 hearts.', effect: 'black_hole', params: { hearts: 2 } },
+        28: { type: 'meteor', name: 'Meteor Shower', description: 'Hit by meteors! Move back 2 spaces and lose 1 heart.', effect: 'meteor_hit', params: { spaces: 2, hearts: 1 } },
+        35: { type: 'space_station', name: 'Space Station', description: 'Repair at the station! Gain 2 hearts and roll again.', effect: 'space_station', params: { hearts: 2 } },
         42: { type: 'comet', name: 'Comet', description: 'Ride a comet across the galaxy! Move forward 4 spaces.', effect: 'move_forward', params: { spaces: 4 } },
-        50: { type: 'ufo', name: 'UFO Encounter', description: 'Aliens abduct you! Skip your next turn.', effect: 'lose_turn' }
+        50: { type: 'ufo', name: 'UFO Encounter', description: 'Aliens abduct you! Skip your next turn and lose 1 heart.', effect: 'ufo_abduction', params: { hearts: 1 } }
     },
     
     // Visual elements for board decoration
