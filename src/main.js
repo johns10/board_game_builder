@@ -104,32 +104,38 @@ function startGame() {
     
     // Add human players
     for (let i = 0; i < gameState.humanCount; i++) {
+        const playerId = `human_${playerIndex}`;
         gameState.players.push({
             index: playerIndex,
             position: 0,
             avatar: gameConfig.players[playerIndex].avatar,
-            avatarPng: `${gameConfig.players[playerIndex].avatar}.png`,
-            avatarSvg: `${gameConfig.players[playerIndex].avatar}.svg`,
+            avatarPng: gameConfig.players[playerIndex].avatar,
+            avatarSvg: gameConfig.players[playerIndex].avatar,
             color: gameConfig.players[playerIndex].color,
             skipTurn: false,
             type: 'human',
-            hearts: 5
+            hearts: 5,
+            playerId: playerId,
+            money: moneyManager.getPlayerMoney(playerId)
         });
         playerIndex++;
     }
     
     // Add computer players
     for (let i = 0; i < gameState.computerCount; i++) {
+        const playerId = `computer_${playerIndex}`;
         gameState.players.push({
             index: playerIndex,
             position: 0,
             avatar: gameConfig.players[playerIndex].avatar,
-            avatarPng: `${gameConfig.players[playerIndex].avatar}.png`,
-            avatarSvg: `${gameConfig.players[playerIndex].avatar}.svg`,
+            avatarPng: gameConfig.players[playerIndex].avatar,
+            avatarSvg: gameConfig.players[playerIndex].avatar,
             color: gameConfig.players[playerIndex].color,
             skipTurn: false,
             type: 'computer',
-            hearts: 5
+            hearts: 5,
+            playerId: playerId,
+            money: moneyManager.getPlayerMoney(playerId)
         });
         playerIndex++;
     }
@@ -251,18 +257,44 @@ function movePlayer(player, spaces) {
     
     // Animate movement
     animateMovement(player, newPosition, () => {
-        // Check for special tile
-        const specialTile = gameConfig.specialTiles[newPosition];
-        if (specialTile) {
-            handleSpecialTile(player, specialTile);
-        } else {
-            gameState.animating = false;
+        // Check for money tile first
+        const moneyAmount = gameConfig.moneyTiles[newPosition];
+        if (moneyAmount) {
+            moneyManager.addMoney(player.playerId, moneyAmount);
+            player.money = moneyManager.getPlayerMoney(player.playerId);
+            updateStatusMessage(`Player ${player.index + 1} collected $${moneyAmount}! Total: $${player.money}`);
+            updateUI();
             
-            // Check for win
-            if (newPosition === gameConfig.path.length - 1) {
-                handleWin(player);
+            setTimeout(() => {
+                // Check for special tile after money collection
+                const specialTile = gameConfig.specialTiles[newPosition];
+                if (specialTile) {
+                    handleSpecialTile(player, specialTile);
+                } else {
+                    gameState.animating = false;
+                    
+                    // Check for win
+                    if (newPosition === gameConfig.path.length - 1) {
+                        handleWin(player);
+                    } else {
+                        nextTurn();
+                    }
+                }
+            }, 1500);
+        } else {
+            // Check for special tile
+            const specialTile = gameConfig.specialTiles[newPosition];
+            if (specialTile) {
+                handleSpecialTile(player, specialTile);
             } else {
-                nextTurn();
+                gameState.animating = false;
+                
+                // Check for win
+                if (newPosition === gameConfig.path.length - 1) {
+                    handleWin(player);
+                } else {
+                    nextTurn();
+                }
             }
         }
     });
@@ -388,8 +420,12 @@ function handlePlayerLoss(player) {
 }
 
 function handleWin(player) {
+    // Award win bonus
+    moneyManager.awardWinBonus(player.playerId);
+    player.money = moneyManager.getPlayerMoney(player.playerId);
+    
     gameState.phase = 'gameover';
-    updateStatusMessage(`${player.type === 'computer' ? 'Computer' : 'Player'} ${player.index + 1} wins!`);
+    updateStatusMessage(`${player.type === 'computer' ? 'Computer' : 'Player'} ${player.index + 1} wins and earns $20! Total: $${player.money}`);
     rollButton.disabled = true;
     
     // Remove game-started class to reset UI
@@ -477,6 +513,13 @@ function updateUI() {
         text.style.fontWeight = player.index === gameState.currentPlayerIndex ? 'bold' : 'normal';
         text.textContent = `${player.type === 'computer' ? 'Computer' : 'Player'} ${player.index + 1}`;
         
+        const money = document.createElement('div');
+        money.className = 'money';
+        money.style.fontSize = '12px';
+        money.style.color = '#2c3e50';
+        money.style.fontWeight = 'bold';
+        money.textContent = `💰 $${player.money || 0}`;
+        
         const hearts = document.createElement('div');
         hearts.className = 'hearts';
         
@@ -487,6 +530,7 @@ function updateUI() {
         }
         
         playerInfo.appendChild(text);
+        playerInfo.appendChild(money);
         playerInfo.appendChild(hearts);
         
         playerDiv.appendChild(avatarImg);

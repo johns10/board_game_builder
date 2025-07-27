@@ -9,10 +9,10 @@ const gameConfig = {
     
     // Player avatars and fallback colors
     players: [
-        { avatar: 'images/avatars/player1', color: '#e74c3c' },
-        { avatar: 'images/avatars/player2', color: '#3498db' },
-        { avatar: 'images/avatars/player3', color: '#2ecc71' },
-        { avatar: 'images/avatars/player4', color: '#f39c12' }
+        { avatar: 'images/avatars/player1.png', color: '#e74c3c' },
+        { avatar: 'images/avatars/player2.svg', color: '#3498db' },
+        { avatar: 'images/avatars/player3.png', color: '#2ecc71' },
+        { avatar: 'images/avatars/player4.png', color: '#f39c12' }
     ],
     
     // Path definition - [x, y] coordinates for each tile
@@ -39,7 +39,7 @@ const gameConfig = {
         [5, 5]  // Finish position
     ],
     
-    // Special tiles configuration
+    // Special tiles configuration  
     specialTiles: {
         4: { type: 'wormhole', name: 'Wormhole', description: 'Teleport ahead 5 spaces!', effect: 'move_forward', params: { spaces: 5 } },
         10: { type: 'asteroid', name: 'Asteroid Field', description: 'Hit by asteroids! Lose 1 heart.', effect: 'lose_hearts', params: { hearts: 1 } },
@@ -49,6 +49,21 @@ const gameConfig = {
         35: { type: 'space_station', name: 'Space Station', description: 'Repair at the station! Gain 2 hearts and roll again.', effect: 'space_station', params: { hearts: 2 } },
         42: { type: 'comet', name: 'Comet', description: 'Ride a comet across the galaxy! Move forward 4 spaces.', effect: 'move_forward', params: { spaces: 4 } },
         50: { type: 'ufo', name: 'UFO Encounter', description: 'Aliens abduct you! Skip your next turn and lose 1 heart.', effect: 'ufo_abduction', params: { hearts: 1 } }
+    },
+
+    // Money tiles configuration
+    moneyTiles: {
+        3: 5,
+        7: 5,
+        12: 10,
+        18: 5,
+        25: 10,
+        33: 5,
+        38: 15,
+        45: 5,
+        52: 10,
+        58: 5,
+        62: 20
     },
     
     // Visual elements for board decoration

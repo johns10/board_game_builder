@@ -44,6 +44,9 @@ class BoardRenderer {
             } else if (index === this.config.path.length - 1) {
                 tileColor = '#FF5722'; // Finish
                 textColor = '#ffffff';
+            } else if (this.config.moneyTiles && this.config.moneyTiles[index]) {
+                tileColor = '#FFD700'; // Gold for money tiles
+                textColor = '#000000';
             } else if (this.config.specialTiles[index]) {
                 const specialTile = this.config.specialTiles[index];
                 switch (specialTile.type) {
@@ -74,6 +77,15 @@ class BoardRenderer {
             this.ctx.textBaseline = 'top';
             this.ctx.fillText(index, xPos + 2, yPos + 2);
             
+            // Draw money amount on money tiles
+            if (this.config.moneyTiles && this.config.moneyTiles[index]) {
+                this.drawMoneyIcon(
+                    this.config.moneyTiles[index],
+                    xPos + this.config.tileSize / 2,
+                    yPos + this.config.tileSize / 2 + 5
+                );
+            }
+            
             // Draw special tile icons
             if (this.config.specialTiles[index]) {
                 this.drawTileIcon(
@@ -85,6 +97,31 @@ class BoardRenderer {
         });
     }
     
+    drawMoneyIcon(amount, x, y) {
+        // Draw coin
+        this.ctx.fillStyle = '#FFD700';
+        this.ctx.beginPath();
+        this.ctx.arc(x, y - 5, 8, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Coin border
+        this.ctx.strokeStyle = '#FFA000';
+        this.ctx.lineWidth = 1;
+        this.ctx.stroke();
+        
+        // Dollar sign
+        this.ctx.fillStyle = '#FFA000';
+        this.ctx.font = 'bold 10px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText('$', x, y - 5);
+        
+        // Amount text
+        this.ctx.fillStyle = '#000000';
+        this.ctx.font = 'bold 8px Arial';
+        this.ctx.fillText(amount, x, y + 8);
+    }
+
     drawTileIcon(type, x, y) {
         this.ctx.fillStyle = '#ffffff';
         
@@ -260,26 +297,6 @@ class BoardRenderer {
     }
     
     drawTitle() {
-        this.ctx.save();
-        this.ctx.translate(this.canvas.width / 2, this.canvas.height / 2);
-        this.ctx.rotate((-10 * Math.PI) / 180);
-        
-        // Title background
-        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-        this.ctx.strokeStyle = '#333333';
-        this.ctx.lineWidth = 2;
-        this.ctx.fillRect(-120, -40, 240, 80);
-        this.ctx.strokeRect(-120, -40, 240, 80);
-        
-        // Title text
-        this.ctx.fillStyle = '#2980b9';
-        this.ctx.font = 'bold 24px Arial';
-        this.ctx.textAlign = 'center';
-        this.ctx.textBaseline = 'middle';
-        this.ctx.fillText('SPACE', 0, -10);
-        this.ctx.fillText('ADVENTURE', 0, 20);
-        
-        this.ctx.restore();
     }
     
     drawPlayers(players) {
