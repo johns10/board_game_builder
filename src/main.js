@@ -187,19 +187,46 @@ function handleComputerTurn() {
     
     // Roll dice after a short delay
     setTimeout(() => {
-        const roll = Math.floor(Math.random() * 6) + 1;
+        let roll = Math.floor(Math.random() * 6) + 1;
+        
+        // Check for lucky charm (roll twice, take better)
+        if (typeof shop !== 'undefined' && shop.hasItem(currentPlayer.playerId, 'luckyCharm')) {
+            const roll2 = Math.floor(Math.random() * 6) + 1;
+            if (roll2 > roll) {
+                roll = roll2;
+                shop.useItem(currentPlayer.playerId, 'luckyCharm');
+                if (typeof inventoryManager !== 'undefined') {
+                    inventoryManager.showItemUsage('luckyCharm', '🍀');
+                }
+                updateStatusMessage(`Player ${currentPlayer.index + 1} used Lucky Charm and rolled ${roll}!`);
+            }
+        }
+        
         gameState.dice = roll;
         
         // Stop rolling animation and show result
         diceFace.classList.remove('rolling');
         diceFace.setAttribute('data-value', roll.toString());
         
-        // Update status
-        updateStatusMessage(`Player ${currentPlayer.index + 1} rolled a ${roll}!`);
+        // Update status if not already updated by lucky charm
+        if (!statusMessage.textContent.includes('Lucky Charm')) {
+            updateStatusMessage(`Player ${currentPlayer.index + 1} rolled a ${roll}!`);
+        }
+        
+        // Check for warp drive bonus
+        let bonusSpaces = 0;
+        if (typeof shop !== 'undefined' && shop.hasItem(currentPlayer.playerId, 'jumpBoost')) {
+            bonusSpaces = 3;
+            shop.useItem(currentPlayer.playerId, 'jumpBoost');
+            if (typeof inventoryManager !== 'undefined') {
+                inventoryManager.showItemUsage('jumpBoost', '🚀');
+            }
+            updateStatusMessage(`Player ${currentPlayer.index + 1} used Warp Drive for ${roll + bonusSpaces} total spaces!`);
+        }
         
         // Move player after showing dice
         setTimeout(() => {
-            movePlayer(currentPlayer, roll);
+            movePlayer(currentPlayer, roll + bonusSpaces);
         }, 1000);
     }, 600);
 }
@@ -231,19 +258,46 @@ function handleRoll() {
     
     // Roll dice after a short delay
     setTimeout(() => {
-        const roll = Math.floor(Math.random() * 6) + 1;
+        let roll = Math.floor(Math.random() * 6) + 1;
+        
+        // Check for lucky charm (roll twice, take better)
+        if (typeof shop !== 'undefined' && shop.hasItem(currentPlayer.playerId, 'luckyCharm')) {
+            const roll2 = Math.floor(Math.random() * 6) + 1;
+            if (roll2 > roll) {
+                roll = roll2;
+                shop.useItem(currentPlayer.playerId, 'luckyCharm');
+                if (typeof inventoryManager !== 'undefined') {
+                    inventoryManager.showItemUsage('luckyCharm', '🍀');
+                }
+                updateStatusMessage(`Player ${currentPlayer.index + 1} used Lucky Charm and rolled ${roll}!`);
+            }
+        }
+        
         gameState.dice = roll;
         
         // Stop rolling animation and show result
         diceFace.classList.remove('rolling');
         diceFace.setAttribute('data-value', roll.toString());
         
-        // Update status
-        updateStatusMessage(`Player ${currentPlayer.index + 1} rolled a ${roll}!`);
+        // Update status if not already updated by lucky charm
+        if (!statusMessage.textContent.includes('Lucky Charm')) {
+            updateStatusMessage(`Player ${currentPlayer.index + 1} rolled a ${roll}!`);
+        }
+        
+        // Check for warp drive bonus
+        let bonusSpaces = 0;
+        if (typeof shop !== 'undefined' && shop.hasItem(currentPlayer.playerId, 'jumpBoost')) {
+            bonusSpaces = 3;
+            shop.useItem(currentPlayer.playerId, 'jumpBoost');
+            if (typeof inventoryManager !== 'undefined') {
+                inventoryManager.showItemUsage('jumpBoost', '🚀');
+            }
+            updateStatusMessage(`Player ${currentPlayer.index + 1} used Warp Drive for ${roll + bonusSpaces} total spaces!`);
+        }
         
         // Move player after showing dice
         setTimeout(() => {
-            movePlayer(currentPlayer, roll);
+            movePlayer(currentPlayer, roll + bonusSpaces);
             rollButton.disabled = false;
         }, 1000);
     }, 600);
@@ -334,47 +388,99 @@ function handleSpecialTile(player, tile) {
                 break;
                 
             case 'lose_hearts':
-                player.hearts = Math.max(0, player.hearts - tile.params.hearts);
-                updateUI();
-                if (player.hearts === 0) {
-                    handlePlayerLoss(player);
+                if (typeof shop !== 'undefined' && shop.hasItem(player.playerId, 'shield')) {
+                    shop.useItem(player.playerId, 'shield');
+                    if (typeof inventoryManager !== 'undefined') {
+                        inventoryManager.showItemUsage('shield', '🛡️');
+                    }
+                    updateStatusMessage(`${tile.name}: Space Shield protected you from losing hearts!`);
+                    setTimeout(() => {
+                        gameState.animating = false;
+                        nextTurn();
+                    }, 1500);
                 } else {
-                    gameState.animating = false;
-                    nextTurn();
+                    player.hearts = Math.max(0, player.hearts - tile.params.hearts);
+                    updateUI();
+                    if (player.hearts === 0) {
+                        handlePlayerLoss(player);
+                    } else {
+                        gameState.animating = false;
+                        nextTurn();
+                    }
                 }
                 break;
                 
             case 'gain_hearts':
                 player.hearts = Math.min(5, player.hearts + tile.params.hearts);
+                
+                // Check if player has Heart Booster and wants to use it
+                if (typeof shop !== 'undefined' && shop.hasItem(player.playerId, 'extraLife') && player.hearts < 5) {
+                    shop.useItem(player.playerId, 'extraLife');
+                    if (typeof inventoryManager !== 'undefined') {
+                        inventoryManager.showItemUsage('extraLife', '❤️‍🩹');
+                    }
+                    player.hearts = Math.min(5, player.hearts + 1);
+                    updateStatusMessage(`${tile.name}: You also used Heart Booster for an extra heart!`);
+                }
+                
                 updateUI();
                 gameState.animating = false;
                 nextTurn();
                 break;
                 
             case 'black_hole':
-                player.hearts = Math.max(0, player.hearts - tile.params.hearts);
-                updateUI();
-                if (player.hearts === 0) {
-                    handlePlayerLoss(player);
+                if (typeof shop !== 'undefined' && shop.hasItem(player.playerId, 'shield')) {
+                    shop.useItem(player.playerId, 'shield');
+                    if (typeof inventoryManager !== 'undefined') {
+                        inventoryManager.showItemUsage('shield', '🛡️');
+                    }
+                    updateStatusMessage(`${tile.name}: Space Shield protected you from losing hearts! But you still go back to start.`);
+                    setTimeout(() => {
+                        animateMovement(player, 0, () => {
+                            gameState.animating = false;
+                            nextTurn();
+                        });
+                    }, 1500);
                 } else {
-                    animateMovement(player, 0, () => {
-                        gameState.animating = false;
-                        nextTurn();
-                    });
+                    player.hearts = Math.max(0, player.hearts - tile.params.hearts);
+                    updateUI();
+                    if (player.hearts === 0) {
+                        handlePlayerLoss(player);
+                    } else {
+                        animateMovement(player, 0, () => {
+                            gameState.animating = false;
+                            nextTurn();
+                        });
+                    }
                 }
                 break;
                 
             case 'meteor_hit':
-                player.hearts = Math.max(0, player.hearts - tile.params.hearts);
-                updateUI();
-                if (player.hearts === 0) {
-                    handlePlayerLoss(player);
+                if (typeof shop !== 'undefined' && shop.hasItem(player.playerId, 'shield')) {
+                    shop.useItem(player.playerId, 'shield');
+                    if (typeof inventoryManager !== 'undefined') {
+                        inventoryManager.showItemUsage('shield', '🛡️');
+                    }
+                    updateStatusMessage(`${tile.name}: Space Shield protected you from losing hearts! But you still move back.`);
+                    setTimeout(() => {
+                        const newPos = Math.max(0, player.position - tile.params.spaces);
+                        animateMovement(player, newPos, () => {
+                            gameState.animating = false;
+                            nextTurn();
+                        });
+                    }, 1500);
                 } else {
-                    const newPos = Math.max(0, player.position - tile.params.spaces);
-                    animateMovement(player, newPos, () => {
-                        gameState.animating = false;
-                        nextTurn();
-                    });
+                    player.hearts = Math.max(0, player.hearts - tile.params.hearts);
+                    updateUI();
+                    if (player.hearts === 0) {
+                        handlePlayerLoss(player);
+                    } else {
+                        const newPos = Math.max(0, player.position - tile.params.spaces);
+                        animateMovement(player, newPos, () => {
+                            gameState.animating = false;
+                            nextTurn();
+                        });
+                    }
                 }
                 break;
                 
@@ -383,17 +489,40 @@ function handleSpecialTile(player, tile) {
                 updateUI();
                 gameState.animating = false;
                 updateStatusMessage(`Player ${player.index + 1} gets another turn!`);
+                
+                // Enable roll button for human players or start computer turn
+                setTimeout(() => {
+                    const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+                    rollButton.disabled = currentPlayer.type === 'computer';
+                    
+                    if (currentPlayer.type === 'computer') {
+                        setTimeout(handleComputerTurn, 1000);
+                    }
+                }, 1500);
                 break;
                 
             case 'ufo_abduction':
-                player.hearts = Math.max(0, player.hearts - tile.params.hearts);
-                player.skipTurn = true;
-                updateUI();
-                if (player.hearts === 0) {
-                    handlePlayerLoss(player);
+                if (typeof shop !== 'undefined' && shop.hasItem(player.playerId, 'shield')) {
+                    shop.useItem(player.playerId, 'shield');
+                    if (typeof inventoryManager !== 'undefined') {
+                        inventoryManager.showItemUsage('shield', '🛡️');
+                    }
+                    updateStatusMessage(`${tile.name}: Space Shield protected you from losing hearts! But you still skip next turn.`);
+                    player.skipTurn = true;
+                    setTimeout(() => {
+                        gameState.animating = false;
+                        nextTurn();
+                    }, 1500);
                 } else {
-                    gameState.animating = false;
-                    nextTurn();
+                    player.hearts = Math.max(0, player.hearts - tile.params.hearts);
+                    player.skipTurn = true;
+                    updateUI();
+                    if (player.hearts === 0) {
+                        handlePlayerLoss(player);
+                    } else {
+                        gameState.animating = false;
+                        nextTurn();
+                    }
                 }
                 break;
         }
@@ -520,6 +649,7 @@ function updateUI() {
         money.style.fontWeight = 'bold';
         money.textContent = `💰 $${player.money || 0}`;
         
+        
         const hearts = document.createElement('div');
         hearts.className = 'hearts';
         
@@ -541,6 +671,11 @@ function updateUI() {
     // Draw board and players
     renderer.drawBoard();
     renderer.drawPlayers(gameState.players);
+    
+    // Update inventory display
+    if (typeof inventoryManager !== 'undefined') {
+        inventoryManager.showInventoryForCurrentPlayer();
+    }
 }
 
 function updateStatusMessage(message) {
