@@ -235,6 +235,11 @@ class InventoryManager {
         }
 
         this.inventoryContainer.appendChild(inventoryGrid);
+        
+        // Add share buttons if gift context is available
+        if (typeof giftContext !== 'undefined') {
+            giftContext.addShareButtonsToInventory();
+        }
     }
 
     showInventoryForCurrentPlayer() {

@@ -290,6 +290,10 @@ class Shop {
         this.playerInventories[playerId][itemId] += uses;
     }
 
+    addItem(playerId, itemId, uses = 1) {
+        this.addItemToInventory(playerId, itemId, uses);
+    }
+
     getPlayerInventory(playerId) {
         return this.playerInventories[playerId] || {};
     }
